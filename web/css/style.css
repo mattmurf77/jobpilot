@@ -1,0 +1,122 @@
+/* JobPilot base styles. Shared chrome owned by orchestrator; feature modules may
+   append component styles at the bottom in their own marked sections. */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --border: #e3e6ea;
+  --text: #14181f;
+  --text-dim: #5b6470;
+  --accent: #2563eb;
+  --accent-dark: #1d4ed8;
+  --green: #16a34a;
+  --red: #dc2626;
+  --amber: #d97706;
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 10px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.brand { font-size: 17px; font-weight: 700; }
+.tabs { display: flex; gap: 4px; flex: 1; }
+.tab {
+  border: none;
+  background: transparent;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.tab:hover { background: #eef1f5; }
+.tab.active { background: #e8efff; color: var(--accent-dark); }
+.health { font-size: 14px; color: #9ca3af; }
+
+main { max-width: 1280px; margin: 0 auto; padding: 20px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* shared components */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px 16px;
+}
+.badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+button.btn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+button.btn:hover { background: #f0f3f7; }
+button.btn:disabled { opacity: 0.5; cursor: default; }
+button.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.btn-primary:hover { background: var(--accent-dark); }
+button.btn-danger { color: var(--red); border-color: #f3c5c5; }
+button.btn-success { background: var(--green); border-color: var(--green); color: #fff; }
+input[type="text"], input[type="search"], input[type="password"], input[type="number"], textarea, select {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13.5px;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--text);
+  width: 100%;
+}
+textarea { resize: vertical; }
+label.field { display: block; margin-bottom: 10px; font-weight: 600; font-size: 12.5px; color: var(--text-dim); }
+label.field > * { margin-top: 4px; font-weight: 400; color: var(--text); }
+
+/* toasts */
+#toast-container { position: fixed; bottom: 18px; right: 18px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  background: #1f2937; color: #fff; padding: 10px 16px; border-radius: 8px;
+  font-size: 13.5px; opacity: 0; transform: translateY(8px); transition: all .25s ease;
+  max-width: 380px; box-shadow: 0 4px 14px rgba(0,0,0,.25);
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast-error { background: #7f1d1d; }
+.toast-success { background: #14532d; }
+
+.empty-state { text-align: center; color: var(--text-dim); padding: 60px 0; }
+.spinner {
+  display: inline-block; width: 14px; height: 14px; border: 2px solid #ffffff66;
+  border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite;
+  vertical-align: -2px; margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

@@ -1,0 +1,15 @@
+# Environment / tooling
+.venv
+__pycache__/
+*.pyc
+.DS_Store
+.env
+
+# Personal data — never committed. See README "What stays private".
+config.json
+data/profile.json
+data/jobpilot.db
+data/documents/
+data/letters/
+materials/personal/*
+!materials/personal/.gitkeep

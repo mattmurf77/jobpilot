@@ -1,0 +1,80 @@
+{
+  "search": {
+    "keywords": [
+      "senior product manager",
+      "lead product manager",
+      "principal product manager"
+    ],
+    "domain_terms": [
+      "fintech",
+      "payments",
+      "B2B SaaS",
+      "AI"
+    ],
+    "locations": [
+      "New York",
+      "Remote"
+    ],
+    "remote_only": false,
+    "min_score": 0,
+    "career_bias": "up_or_lateral",
+    "current_level": "senior",
+    "title_ladder": [
+      "intern",
+      "associate",
+      "junior",
+      "",
+      "senior",
+      "lead",
+      "staff",
+      "principal",
+      "group",
+      "director",
+      "head of",
+      "vp",
+      "vice president"
+    ],
+    "bonus_signals": {
+      "growth": ["growth", "0-1", "0 to 1", "zero to one", "greenfield", "founding", "first product manager"],
+      "ai": ["ai", "llm", "genai", "generative ai", "machine learning", "agentic", "copilot"]
+    },
+    "dream_score_boost": 15
+  },
+  "watchlist": {
+    "greenhouse": ["stripe", "gusto"],
+    "lever": [],
+    "ashby": ["ramp"]
+  },
+  "dream_companies": [],
+  "materials": {
+    "line_menu": "materials/personal/resume_line_menu.md",
+    "resume_template_html": "materials/personal/resume_template.html",
+    "cover_letter_reference": "materials/personal/cover_letter_reference.md",
+    "resume_best_practices": "materials/guides/resume_best_practices.md",
+    "cover_letter_best_practices": "materials/guides/cover_letter_best_practices.md",
+    "generalization_guide": "materials/guides/resume_generalization_guide.md",
+    "voice_guide": "materials/guides/writing_voice_guide.md",
+    "html_to_pdf_script": ""
+  },
+  "tailoring": {
+    "model": "claude-opus-5",
+    "max_bullets_per_role": 6,
+    "enforce_one_page": true,
+    "menu_slots": {
+      "main": ["3", "4", "5"],
+      "earlier": ["6"],
+      "second_role": ["7"],
+      "projects": ["17"]
+    },
+    "projects": {
+      "heading": "",
+      "dates": "",
+      "scope_line": "",
+      "triggers": []
+    }
+  },
+  "features": {
+    "cover_letters": true,
+    "auto_submit_greenhouse_lever": true
+  }
+}
