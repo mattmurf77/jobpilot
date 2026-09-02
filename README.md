@@ -74,3 +74,7 @@ A Claude Code skill ships in `.claude/skills/jobpilot/`: open the repo in Claude
 - `scripts/`: `setup.sh`, `onboard.py`.
 - `research/`: the research notes behind the guides and the voice rules.
 - `docs/`: product spec (`APP_PLAN.md`), internal API contracts (`CONTRACTS.md`), build history.
+
+## License
+
+MIT. See `LICENSE`.
