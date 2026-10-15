@@ -13,3 +13,10 @@ data/documents/
 data/letters/
 materials/personal/*
 !materials/personal/.gitkeep
+
+# Codex private workspace: documents, claims, answers, grants, receipts and tables
+.jobpilot/
+# Local test/cache artifacts
+.pytest_cache/
+.coverage
+htmlcov/

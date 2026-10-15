@@ -1,42 +1,22 @@
-# MANIFEST — Agent B (Resume tailoring + cover letters + document rendering)
+# Historical implementation note: résumé tailoring and cover generation
 
-## Files written (only files owned by Agent B)
+This archived note describes the original app, not the current Codex workflow.
+Candidate-specific filenames, résumé menu contents, financial metrics and live
+local test artifacts from the original build have been removed from this
+shareable working tree. Earlier Git history is unchanged; do not infer that
+history was scrubbed or that old tests validate the current edition.
 
-| File | Purpose |
-|---|---|
-| `backend/line_menu.py` | Parses `resume_line_menu.md` into a structured inventory (sections/bullets with ids + metrics, §0.2 subtitles, §1 summary variants, §0.1 value props, §0.5.2 translation pairs, §8 skills library). Falls back to extracting bullets from the baseline resume HTML if the menu yields <10 bullets. Also `load_baseline()`: the stable resume skeleton (name/subtitle/contact/roles/titles/dates/scope/education/CSS) parsed from the template. Both cached (mtime-keyed). |
-| `backend/tailoring.py` | `tailor(job, profile, config)` → `{mode, resume, notes}`. LLM mode (anthropic SDK, model from config, one call, `{`-prefill, strict JSON schema) with full validation: bullet ids must exist; `_validate_numbers` rejects any rephrased line whose numeric tokens aren't in the source line (verbatim source substituted); subtitle must match a §0.2 variant; summary numbers validated against its source variant; skills must trace to baseline/§8 library. Any API/parse/validation error → basic mode. Basic mode: deterministic keyword-overlap scoring (+ metric & scale boosts), dedupe of repeated metrics, Tier-4 jargon translation, skills reordered/bolded by JD frequency. Skeleton (companies/titles/dates/education) always from the baseline — never varies. |
-| `backend/docgen.py` | `render_resume_html` rebuilds the body from the structured resume using the template's exact `<style>` block. `render_pdf` shells out to the html-to-pdf node script (`--format=Letter --margin=0 --scale=1.0 --wait=2000`); page count via `mdls` with 1s retry **plus a PDF-binary fallback** (`/Count` in the pages tree) because Spotlight does not index `data/` (mdls returned "could not find" there — fallback was required in practice). `render_resume_pdf_one_page` trims the lowest-scoring bullet and re-renders, up to 4 times (main role floor: 3 bullets). `render_cover_letter_html`: letterhead layout matching the resume's fonts/colors. |
-| `backend/cover_letter.py` | `generate(job, profile, tailored_resume, config)`. LLM mode: prompt encodes distilled rules from `cover_letter_best_practices.md` (hook-first, 4 paragraphs, ≤300 words, JD-phrase mirroring, no clichés, no fabricated anecdotes); grounded only in resume facts + JD; numeric tokens validated against sources, over-length/invented-number outputs rejected → basic. Basic mode: template with company/role hook + 2 proof paragraphs from `profile.facts` ranked by JD keyword overlap; `needs_editing: true`. |
-| `backend/routes_tailor.py` | Replaced stub. `POST /api/tailor/<id>` (status→tailoring→tailored, writes `data/documents/job_<id>/resume.html`, `add_document` with `{mode, structure, notes}` meta, restores prior status on failure), `/render` (1-page enforcement when un-edited structure exists; renders saved HTML as-is when user-edited; `Matt_Murphy_Resume_<Company>.pdf` sanitized), `/cover-letter`, `/cover-letter/render`, `/save` (new doc version per edit), `/materials` (latest doc per kind + content for text kinds), `/approve` (→ `ready`). All lifecycle actions logged via `log_event`; all errors returned as JSON. |
-| `web/js/review.js` | Replaced stub. Owns `#tab-review`; registers `TabHooks["review"]` and renders at load; honors `consumeTabContext()` jobId. Left: job dropdown (statuses interested/tailoring/tailored/ready), JD (pre-wrap, escaped), matched-keyword chips. Right: action bar (✨ Tailor with LLM/Basic mode badge, 📄 Render PDF with page-count badge + trim notice, ✉️ Generate cover letter (auto-renders its PDF after), 💾 Save edits, ✅ Approve), resume preview in `<iframe src="/api/documents/file/<doc_id>">`, ✏️ Edit-HTML toggle (saves as new resume_html version), cover-letter markdown `<textarea>`, provenance line (line-menu § refs), PDF download links. Buttons disable + spinner while running. Approve → toast + `switchToTab('pipeline', {jobId})`. Styles injected as `#style-review`; all job strings piped through `escapeHtml`. |
+The original implementation added:
 
-## Endpoints implemented (contract: "Agent B serves")
+- A numbered résumé line-menu parser and a stable baseline résumé skeleton.
+- Evidence-constrained bullet selection, numeric-token checks and basic-mode
+  fallback when a model response failed validation.
+- Résumé/cover rendering, editable drafts and review routes.
+- Keyword chips and a preview/download interface in the local Flask app.
 
-`POST /api/tailor/<job_id>`, `POST /api/tailor/<job_id>/render`, `POST /api/tailor/<job_id>/cover-letter`, `POST /api/tailor/<job_id>/cover-letter/render`, `POST /api/tailor/<job_id>/save`, `GET /api/tailor/<job_id>/materials`, `POST /api/tailor/<job_id>/approve` — all registered under `/api/tailor` (verified via `app.url_map`).
-
-## What was tested (and actual results)
-
-All with `.venv/bin/python`, Flask test client, **no ANTHROPIC_API_KEY set** (basic mode), except the mocked LLM tests.
-
-1. **Compilation / app construction** — `py_compile` clean on all 5 backend files; `create_app()` constructs; all 7 routes present.
-2. **Parser vs the real menu file** — source=`menu`; sections `2:4, 3:22, 4:10, 5:18, 6:14, 7:8, 9:4, 10:3` = **83 bullets**; 5 subtitles; 6 summary variants; 5 value props; **23 translation pairs** (PPBL→PayPal Business Loan, GML→merchant-lending product team, RTB→production/operational releases, etc. — all sensible on inspection); 81 skills-library tokens.
-3. **End-to-end basic mode** — fake job via `db.upsert_job` (Ramp "Senior Product Manager, Lending", ~290-word realistic PM JD, job id **1077**, left in DB as evidence — delete when convenient):
-   - Tailor: mode=basic, 6 main bullets led by §3.1.1 (Partner-Distributed Lending 0-1) and §3.3.1 (PDLC rebuild), 2 earlier-impact, 1 sales bullet; jargon scan of output HTML for PPBL/PPWC/GML/RTB/Big Rocks/BBUW/EWC: **zero leaks**; status `interested→tailoring→tailored`.
-   - Render: first pass was 2 pages → trim loop removed §6.3.1 and §3.1.3 → **1 page confirmed** (`Matt_Murphy_Resume_Ramp.pdf`, ~134 KB). Note: `--expect-pages=1` auto-fit in the node script did NOT fix the overflow by itself; the trim loop was exercised for real.
-   - Cover letter: basic mode, 155 words, `needs_editing: true`, picks open-banking/portfolio/PPP facts (JD-overlap ranked); rendered to 1-page `Matt_Murphy_CoverLetter_Ramp.pdf`.
-   - `/save` (new version + bad-kind 400), `/materials` (returns edited content), `/approve` (status `ready`), event log all verified.
-   - Error paths: tailor on missing job → 404; render before tailor → 400.
-4. **Unit tests of guardrails** — `_validate_numbers` accepts faithful rephrasings, rejects invented `$2.5B` / `15%`; translation word-doubling fixed ("the GML team" no longer yields "team team"/"the the").
-5. **Mocked-LLM validation path** — patched `_llm_call` with a malicious response: nonexistent bullet id dropped; rephrasing with invented `$42M` reverted to verbatim source; summary with invented `$999B` reverted; "Made Up Skill" dropped while sourced skills kept; result mode=llm with notes recording 1 reverted line. A raising `_llm_call` produced a clean fallback to basic mode with "fell back" noted.
-6. **Browser verification (preview server on port 5252 — not 5151/5050)** — Review tab renders: job dropdown shows the test job, JD + 24 matched-keyword chips, iframe shows the pixel-faithful tailored resume (uppercase name, italic subtitle, title progression with right-aligned dates, scope line, bolded metrics), provenance line `§3.1.1, §3.3.1, …`, both download links, "Basic" mode badge, "1 page" badge. Clicked Render PDF live: button disabled with "Rendering…" spinner, re-enabled with badge "1 page". No console errors.
-
-## Known gaps / notes
-
-- **LLM mode could not be live-tested** — no `ANTHROPIC_API_KEY` in this environment. The path is fully coded (anthropic SDK, `{`-prefill, schema in prompt) and its validation + fallback logic is covered by the mocked tests above; first live run should be spot-checked.
-- Basic-mode bullet selection is keyword-driven and deterministic; it scores on jargon-*translated* text and boosts $B-scale metrics, but it can still prefer a generically-matching bullet over a flagship one for unusual JDs. The flagship $1.37B figure is always present via the baseline summary regardless.
-- The §0.5.6 menu source itself says "$71B addressable opportunity" where `profile.json` says "$71M Year-1" — source fidelity is preserved (we never alter source numbers), so the discrepancy is the menu's to fix.
-- `mdls` page count does not work under `data/` (Spotlight doesn't index it); the PDF-binary fallback is authoritative in practice and matched ground truth (2 pages → 1 page) in testing.
-- Matched-keyword chips in `review.js` use a static mirror of `data/profile.json` keywords (no API exposes the profile per the contract; Agent C's `/api/settings` shape is unknown). Update the list if profile keywords change materially.
-- Test artifacts left behind: job id 1077 ("Ramp — Senior Product Manager, Lending", status ready) + its documents under `data/documents/job_1077/`. Safe to delete.
-- No `INTEGRATION_NOTES_B.md` needed — no shared-file changes were required.
+These checks can reject some invented numbers or missing bullet IDs, but do not
+prove factual truth, current job fit, valid permission or employer acceptance.
+One-page trimming and keyword ranking are old app heuristics, not universal
+requirements. The maintained portable procedure is [WORKFLOW](../WORKFLOW.md);
+current tests live in `tests/`. See [MIGRATION](../MIGRATION.md) before importing
+legacy status labels or material.

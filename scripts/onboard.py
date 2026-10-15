@@ -8,7 +8,7 @@ What it writes (nothing outside the repo; all of it gitignored):
     materials/personal/resume_line_menu.md      bullet inventory the tailoring engine selects from
     materials/personal/resume_template.html     baseline resume in the visual template
     materials/personal/cover_letter_reference.md your own letter, used as a voice exemplar (optional)
-    data/profile.json                            contact, targets, keywords, screener defaults
+    data/profile.json                            contact, targets, keywords, unanswered screener fields
     config.json                                  created from config.example.json if missing
 
 With an Anthropic API key (in .env or the environment) Claude drafts the three
@@ -144,7 +144,7 @@ Field guidance:
 - keywords: 20-30 lowercase skill/tool/domain phrases that appear in the resume and would appear in job descriptions.
 - facts: 4-8 short entries, each a single sentence in the first person quoting a flagship, verifiable result from the resume with its number (these seed cover letters). Keys are short snake_case labels.
 - education: one entry per degree/program in the resume.
-- screener_answers: keep the schema's defaults; change work-authorization or relocation answers only if the resume states them.
+- screener_answers: leave every answer empty. Work authorization, sponsorship, relocation, salary, references and demographics need the new user's direct answers, never inference from a resume or sample.
 """
 
 MENU_SYSTEM = """You convert a resume into a "Resume Line Menu": a markdown inventory of every line that could appear on a tailored resume. A parser reads this file, so follow the TEMPLATE's structure exactly: the same `## N.` section numbers, `### N.N —` subsections, and `1.` numbered items. Output ONLY the markdown document (no code fences, no commentary).

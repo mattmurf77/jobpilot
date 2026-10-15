@@ -42,7 +42,7 @@ def display_name(profile):
 
 def file_stem(profile):
     """Name for generated filenames: preferred + last name when a preferred
-    name is set ('Matt_Murphy'), else the full name ('Jane_Q_Doe')."""
+    name is set, else the full name, with non-filename characters removed."""
     import re
     preferred = (profile.get("preferred_name") or "").strip()
     last = (profile.get("last_name") or "").strip()

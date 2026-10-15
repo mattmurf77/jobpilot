@@ -1,80 +1,108 @@
-# JobPilot
+# JobPilot: a portable job-search workflow for Codex
 
-A local, single-user job-application copilot. It pulls fresh postings from the companies you care about, scores them against your profile, tailors your resume to each job description **truthfully** (selecting and reordering real lines from your own inventory, never inventing), drafts cover letters in your voice, lints everything for AI tells, and assists submission with a human "Confirm submit" gate.
+Find suitable jobs, draft truthful materials, submit within your permissions,
+prepare for interviews and track outcomes. This edition works inside Codex;
+the older Flask app is optional. No separate model API key, web server, or
+browser automation package is needed for the Codex workflow.
 
-Everything runs on your machine: Flask + SQLite + a vanilla-JS UI. Your resume, letters, and profile never leave the repo folder and are gitignored.
+## Start in Codex
 
-Built for product-management job hunts (the bundled best-practice guides and default scoring signals are PM-flavored), but every domain-specific piece is configuration.
+1. Clone this repository and open that folder in your own Codex instance:
 
-## Quick start
+   ```sh
+   git clone https://github.com/mattmurf77/jobpilot.git
+   cd jobpilot
+   ```
 
-```bash
-git clone https://github.com/mattmurf77/jobpilot.git && cd jobpilot
-./scripts/setup.sh                     # venv, deps, Chromium, local config files
-# put your Anthropic API key in .env (optional; see "Modes" below)
-.venv/bin/python scripts/onboard.py --resume ~/Documents/my_resume.pdf --cover-letter ~/Documents/my_letter.docx
-.venv/bin/python run.py                # http://127.0.0.1:5151
+2. Start a new chat in the repository and send:
+
+   > Use $jobpilot-start to onboard me. Ask for my résumé and an optional sample
+   > cover letter, interview me about my search and experience, check available
+   > tools, and agree permissions before any external actions.
+
+3. Codex creates a local, gitignored `.jobpilot/` workspace and guides you
+   through documents, targeting, experience and permissions. You can pause and
+   resume; answers already recorded should not be asked again.
+
+Cloning does **not** execute onboarding or grant account access. Codex discovers
+repo-local skills in `.agents/skills`; if they do not appear, restart Codex in
+this folder, or ask it to read `.agents/skills/jobpilot-start/SKILL.md` explicitly.
+See the [official Codex skill guide](https://learn.chatgpt.com/docs/build-skills).
+Use a supported current Codex installation and its normal tool approvals.
+
+## What onboarding covers
+
+- Your current résumé, approved contact details and links; an optional letter
+  or writing sample to establish your voice.
+- Desired duties and title family, seniority, domains, exclusions, work type,
+  location priorities, commute/travel/relocation, and salary currency/base floor.
+- An experience interview: actual ownership, decisions, results, dates,
+  leadership scope, technical depth and where the evidence is still missing.
+- Optional prior applications/receipts, so old submissions are protected.
+- Separate permissions for research/local drafting, browser data entry/uploads,
+  final submission, and optional Gmail or Calendar access. No inherited consent.
+
+You may authorize a bounded set of submissions without approving every routine
+step again. Unknown facts, signatures, materially new agreements and sign-ins
+still need their own resolution. Passwords and verification codes stay with you
+on the service. Schedules and outbound messages are opt-in, not defaults.
+
+## Daily work
+
+| Ask Codex | Skill | Result |
+|---|---|---|
+| “Find roles that match my profile” | `$jobpilot-source` | Saved leads with current official evidence and ranked fit |
+| “Apply to the strongest ready roles in this list” | `$jobpilot-apply` | Verified drafts and authorized submissions, with receipts |
+| “Prepare me for my second-round interview” | `$jobpilot-interview` | Role-to-experience mapping, tactics, strategy and practice |
+| “Reconcile outcomes from my email” | `$jobpilot-track` | Matched outcomes/interview stages, unresolved receipts preserved |
+
+The three maintained tables are **all leads**, **actual applications**, and
+**interview appointments/stages**. Leads use only `expired`, `applied`,
+`not a fit`, or `null`; an applied lead remains applied after rejection.
+Application outcomes and interview rounds belong in their own tables.
+
+Read [the workflow](docs/WORKFLOW.md), [onboarding](docs/ONBOARDING.md),
+[data model](docs/DATA-MODEL.md), and
+[best practices and antipatterns](docs/BEST-PRACTICES.md).
+
+## Local helpers
+
+Python 3.10+ is needed only for these standard-library helpers:
+
+```sh
+python3 scripts/jobpilot_workspace.py init
+python3 scripts/jobpilot_workspace.py doctor
+python3 scripts/jobpilot_workspace.py validate
+python3 scripts/jobpilot_workspace.py export
+python3 -m unittest discover -s tests -p 'test_workspace.py'
 ```
 
-Then, in **Settings**: search keywords and locations, the company watchlist (Greenhouse/Lever/Ashby board slugs), and your dream companies (paste any careers URL; the ATS is auto-detected and the board is fetched on every refresh).
+`init` is idempotent and never overwrites existing files; `validate` checks
+schema/link/evidence invariants, not whether an employer actually received an
+application. `export` makes CSV views of the JSON tables. No helper opens a
+website, installs software, sends data, creates a schedule, or submits a job.
+Codex can maintain the documented JSON directly if Python is unavailable.
 
-Requirements: Python 3.11+, macOS or Linux. Node is not required.
+## Privacy and publication
 
-## What `onboard.py` does
+Keep personal documents, profiles, consents, receipts, browser captures,
+recordings and generated materials under `.jobpilot/` (ignored by Git). Avoid
+secrets in chat, commands, tracked examples or URLs. Gitignore is **not** a
+security boundary and does not remove already tracked files or Git history.
+Check `git status` and staged diffs before sharing; use your normal storage,
+backup and account-access controls. Files transmitted to an employer, model
+provider or connector are subject to that service's handling.
 
-Your resume becomes three files under `materials/personal/` (gitignored) plus `data/profile.json`:
+This repository contains generic procedures and empty templates, not the
+author's résumé, permissions, submissions or candidate-specific defaults.
+Do not use another person's profile or consent as your own.
 
-| File | What it is | Who uses it |
-|---|---|---|
-| `resume_line_menu.md` | Every bullet, summary variant, subtitle variant, skill, and a translation table for company-internal jargon, in a numbered format the engine parses | Tailoring engine (selects from it), evaluation (skills coverage), interview prep |
-| `resume_template.html` | Your baseline resume in the visual template. The engine keeps this skeleton fixed (employers, titles, dates, education) and rebuilds only bullets, summary, subtitle, and skills per job | Tailoring, PDF/DOCX rendering |
-| `cover_letter_reference.md` | Optional. A letter you wrote. The generator matches its structure, length, and voice, and never copies its facts | Cover letters |
-| `data/profile.json` | Contact, current role, target titles/domains, keywords, flagship facts, screener answers | Scoring, evaluation, cover letters, auto-fill |
+## Existing app users
 
-With an API key, Claude drafts these from your resume under a no-invention rule, and the script verifies every number in the drafts appears in your resume text. Without a key it copies annotated templates for you to fill in. **Review the line menu either way**: the engine trusts it completely, so its quality is the ceiling on every tailored resume.
+The Flask/SQLite application remains a separate legacy surface. It does not
+automatically implement the Codex skills, receipt checks or three-table model.
+Read [migration and legacy limitations](docs/MIGRATION.md) before using it.
+The current workflow deliberately does not treat a click as a submission.
+No published release or push is implied by a local checkout update.
 
-## Workflow
-
-1. **Find Jobs**: Refresh pulls from the Greenhouse/Lever/Ashby watchlist plus RemoteOK and Remotive keyword feeds (all free public APIs), plus your dream companies (Greenhouse, Lever, Ashby, Workable, SmartRecruiters, Workday, Pinpoint, and TeamWork Online boards auto-detected; other careers pages are monitored by page-change detection). Each posting is deduped and scored 0-100. Dream jobs bypass keyword filters and get a score boost. Mark Interested or Skip. LinkedIn/Indeed jobs: "Add job manually" (paste URL or JD text).
-2. **Tailor & Review**: per interested job: Tailor resume, Render PDF (1-page enforced, with a length-aware trim loop and an ATS text-layer check), optional cover letter, edit anything, then Approve. Every draft returns voice-lint findings.
-3. **Pipeline**: for approved jobs: Auto-fill (Greenhouse/Lever: a visible Chromium fills the form and stops; you click Confirm submit) or assist mode (copy-paste panel) for other sites. Track Submitted, Interview, Rejected. Interview prep and fit evaluation live here too.
-4. **Settings**: search config, watchlist, dream companies, profile and screener answers, API key, materials status.
-
-A Claude Code skill ships in `.claude/skills/jobpilot/`: open the repo in Claude Code and say `/jobpilot` to refresh, triage new postings in chat, and act on your picks (`/loop 4h /jobpilot` for a recurring digest).
-
-## Modes
-
-- **LLM mode** (`ANTHROPIC_API_KEY` set): Claude selects and lightly rephrases lines, writes the summary, orders skills, and drafts cover letters. Output is validated before use: every bullet id must exist in the inventory, any number not present in the source line rejects the rephrasing, skills must come from the library. Model is `config.json → tailoring.model` (default `claude-opus-5`).
-- **Basic mode** (no key): deterministic keyword-overlap selection, baseline summary, template cover letter flagged for editing. Clearly labeled in the UI. Everything else (discovery, scoring, evaluation, rendering, submission) is identical.
-
-## Guardrails
-
-- Resume and cover-letter content must trace to `materials/personal/`. No fabricated employers, titles, dates, metrics, or skills.
-- The voice linter (`backend/voice_check.py`, rules in `materials/guides/writing_voice_guide.md`) flags em-dashes, AI-tell vocabulary, throat-clearing, false-contrast shapes, and zero-contraction letters on every pass.
-- The final submit click is always yours. No CAPTCHA bypass, no credentialed scraping, no LinkedIn/Indeed automation.
-
-## Configuration
-
-`config.json` (created from `config.example.json`, gitignored) holds:
-
-- `search`: keywords, domain terms, locations, remote-only, career bias with a `title_ladder` and your `current_level` (derived from your profile's current title if blank), `bonus_signals` (JD terms that earn career-fit credit), dream-company score boost.
-- `watchlist`: Greenhouse / Lever / Ashby board slugs. `dream_companies`: managed in Settings.
-- `materials`: paths to the files above (relative to the repo, or absolute if you keep them elsewhere). `html_to_pdf_script` is optional; leave blank to render with Playwright's Chromium.
-- `tailoring`: model, max bullets per role, one-page enforcement, `menu_slots` (which line-menu sections feed which resume slot), and the optional `projects` section (heading, dates, scope line, trigger terms).
-
-## What stays private
-
-`.gitignore` excludes `.env`, `config.json`, `data/profile.json`, the SQLite DB, generated documents, and `materials/personal/`. If you fork this and push, those never leave your machine. Check `git status` before your first push anyway.
-
-## Layout
-
-- `backend/`: Flask blueprints (`routes_jobs` discovery/scoring, `routes_tailor` tailoring/PDF/cover letters, `routes_review` evaluation/critique/interview prep, `routes_submit` submission/settings); `sources/` one fetcher per job board; `submit/` Playwright filler and assist mode; `line_menu.py` parser, `tailoring.py` engine, `docgen.py` rendering, `voice_check.py` linter, `matching.py` + `evaluation.py` scoring; `db.py` schema.
-- `web/`: vanilla JS single page, one module per tab.
-- `materials/`: guides (tracked), templates (tracked), personal (gitignored). See `materials/README.md`.
-- `scripts/`: `setup.sh`, `onboard.py`.
-- `research/`: the research notes behind the guides and the voice rules.
-- `docs/`: product spec (`APP_PLAN.md`), internal API contracts (`CONTRACTS.md`), build history.
-
-## License
-
-MIT. See `LICENSE`.
+MIT licensed; see [LICENSE](LICENSE).

@@ -42,7 +42,7 @@
 - **Capital One:** "Business Focused: delivers outcomes by focusing on leverage and execution excellence"; "own the internal engine that powers high-friction customer touchpoints."
 - **JPMorgan (C&SI Lending):** area product owner "developing the digital experience for internal sales organization"; tracks "adoption, impact and effectiveness."
 
-## 6. Takeaways for the single PayPal block
+## 6. Takeaways for a consolidated employer block
 1. Open each entry with a scope line (originations / merchants / applications per month), then every bullet carries a number. Mercury's list is the metric vocabulary: conversion, approval/decline rate, time-to-funding, loss, repeat/repayment.
 2. Every growth bullet gets a guardrail clause ("while holding losses flat," "with zero compliance findings"). This separates lending PMs from generic growth PMs.
 3. Give the Salesforce/ops-platform phase the Capital One/JPMC framing: "internal engine," adoption, hours saved, handle time; the sales background shows up as evidence here, not as a summary claim.
@@ -51,3 +51,6 @@
 6. Progression shows through verbs and scope escalating down the block (built tool -> launched product -> owned P&L metrics -> grew -> launched new lines), not through labels.
 7. Skills grouped; Claude Code/Cowork/MCP in one "AI & developer tools" line backed by one mechanism bullet.
 8. Two pages fine at Lead/Principal; spend space on numbers, keep summary to 3 sentences with one headline figure.
+
+
+Portable-edition note: dated research and sample bullets are writing examples, not candidate facts. Never copy their metrics into a résumé; use the candidate's supported evidence and current employer requirements.

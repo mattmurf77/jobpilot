@@ -1,8 +1,8 @@
 """Submission assist + settings routes. Agent C.
 
 Blueprint is mounted at /api in app.py, so paths here are /settings/* and /submit/*.
-Guardrail: the final submit click only ever happens via POST /submit/<id>/confirm,
-which the UI gates behind an explicit user confirmation. No auto-submit.
+Legacy browser submission routes are disabled. Copy/paste assist remains
+available; receipt-aware submissions use the Codex workflow, not click inference.
 """
 import os
 
@@ -113,60 +113,15 @@ def prepare(job_id):
     except Exception as e:
         return jsonify({"error": f"failed to load profile: {e}"}), 500
 
-    resume_doc = db.latest_document(job_id, "resume_pdf")
-    resume_path = resume_doc["path"] if resume_doc and os.path.exists(resume_doc["path"]) else None
-    auto_capable = det["ats"] in ("greenhouse", "lever") and filler.available() and resume_path
-
-    if not auto_capable:
-        return _assist_response(job, profile, det)
-
-    cl_doc = db.latest_document(job_id, "cover_letter_pdf")
-    cl_path = cl_doc["path"] if cl_doc and os.path.exists(cl_doc["path"]) else None
-    cl_text = _cover_letter_text(job_id)
-    headless = bool((request.get_json(silent=True) or {}).get("headless"))  # test override
-
-    try:
-        report = filler.prepare(
-            job, profile, resume_path, cl_path,
-            apply_url=det["apply_url"], ats=det["ats"],
-            cover_letter_text=cl_text, headless=headless,
-        )
-    except filler.PlaywrightUnavailable as e:
-        return _assist_response(job, profile, det, note=f"auto-fill unavailable ({e})")
-    except Exception as e:
-        return _assist_response(job, profile, det,
-                                note=f"auto-fill failed ({e}) — use assisted submission")
-
-    db.update_job(job_id, status="submitting")
-    screenshot_doc_id = None
-    shot = report.get("screenshot_path")
-    if shot and os.path.exists(shot):
-        db.add_document(job_id, "form_screenshot", shot, meta={"stage": "prepared"})
-        doc = db.latest_document(job_id, "form_screenshot")
-        screenshot_doc_id = doc["id"] if doc else None
-    db.log_event(job_id, "submit_prepared",
-                 f"{det['ats']} form auto-filled; awaiting user confirmation")
-    return jsonify({"mode": "auto", "ats": det["ats"], "report": report,
-                    "screenshot_doc_id": screenshot_doc_id})
+    return _assist_response(
+        job, profile, det,
+        note="Legacy auto-fill/submit is disabled. Use the employer site or the authorized Codex workflow; save an actual receipt.",
+    )
 
 
 @bp.post("/submit/<int:job_id>/confirm")
 def confirm(job_id):
-    job = db.get_job(job_id)
-    if not job:
-        return jsonify({"error": "job not found"}), 404
-    if job["status"] != "submitting":
-        return jsonify({"error": f"job is '{job['status']}', not 'submitting' — run prepare first"}), 409
-    try:
-        report = filler.confirm(job_id)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 409
-    db.update_job(job_id, status="submitted")
-    rshot = report.get("result_screenshot_path")
-    if rshot and os.path.exists(rshot):
-        db.add_document(job_id, "form_screenshot", rshot, meta={"stage": "submitted"})
-    db.log_event(job_id, "submitted", "auto-filled form, user-confirmed submit click")
-    return jsonify({"ok": True, "report": report})
+    return _disabled_submission()
 
 
 @bp.post("/submit/<int:job_id>/cancel")
@@ -178,20 +133,15 @@ def cancel(job_id):
         closed = filler.cancel(job_id)
     except Exception:
         closed = False
-    if job["status"] == "submitting":
-        db.update_job(job_id, status="ready")
-        db.log_event(job_id, "status_change", "submission cancelled — back to ready")
-    return jsonify({"ok": True, "session_closed": closed})
+    # Closing a browser session does not establish whether an earlier final
+    # action was accepted. Preserve status until exact evidence is reconciled.
+    db.log_event(job_id, "session_closed", "status preserved; reconcile any uncertain prior submission")
+    return jsonify({"ok": True, "session_closed": closed, "status_preserved": True})
 
 
 @bp.post("/submit/<int:job_id>/manual-confirm")
 def manual_confirm(job_id):
-    job = db.get_job(job_id)
-    if not job:
-        return jsonify({"error": "job not found"}), 404
-    db.update_job(job_id, status="submitted")
-    db.log_event(job_id, "submitted", "manual")
-    return jsonify({"ok": True})
+    return _disabled_submission()
 
 
 @bp.get("/submit/<int:job_id>/assist")
@@ -222,6 +172,14 @@ def all_documents():
 
 
 # ---------- helpers ----------
+
+
+def _disabled_submission():
+    return jsonify({
+        "error": "Legacy submission recording is disabled: a click is not a receipt. Use the Codex workflow and confirmed evidence.",
+        "code": "receipt_workflow_required",
+    }), 409
+
 
 def _assist_response(job, profile, det, note=None):
     packet = assist.assist_packet(job, profile, db.list_documents(job["id"]))
