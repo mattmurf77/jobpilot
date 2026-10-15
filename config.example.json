@@ -1,24 +1,12 @@
 {
   "search": {
-    "keywords": [
-      "senior product manager",
-      "lead product manager",
-      "principal product manager"
-    ],
-    "domain_terms": [
-      "fintech",
-      "payments",
-      "B2B SaaS",
-      "AI"
-    ],
-    "locations": [
-      "New York",
-      "Remote"
-    ],
+    "keywords": [],
+    "domain_terms": [],
+    "locations": [],
     "remote_only": false,
     "min_score": 0,
     "career_bias": "up_or_lateral",
-    "current_level": "senior",
+    "current_level": "",
     "title_ladder": [
       "intern",
       "associate",
@@ -34,16 +22,13 @@
       "vp",
       "vice president"
     ],
-    "bonus_signals": {
-      "growth": ["growth", "0-1", "0 to 1", "zero to one", "greenfield", "founding", "first product manager"],
-      "ai": ["ai", "llm", "genai", "generative ai", "machine learning", "agentic", "copilot"]
-    },
-    "dream_score_boost": 15
+    "bonus_signals": {},
+    "dream_score_boost": 0
   },
   "watchlist": {
-    "greenhouse": ["stripe", "gusto"],
+    "greenhouse": [],
     "lever": [],
-    "ashby": ["ramp"]
+    "ashby": []
   },
   "dream_companies": [],
   "materials": {
@@ -61,10 +46,20 @@
     "max_bullets_per_role": 6,
     "enforce_one_page": true,
     "menu_slots": {
-      "main": ["3", "4", "5"],
-      "earlier": ["6"],
-      "second_role": ["7"],
-      "projects": ["17"]
+      "main": [
+        "3",
+        "4",
+        "5"
+      ],
+      "earlier": [
+        "6"
+      ],
+      "second_role": [
+        "7"
+      ],
+      "projects": [
+        "17"
+      ]
     },
     "projects": {
       "heading": "",
@@ -75,6 +70,6 @@
   },
   "features": {
     "cover_letters": true,
-    "auto_submit_greenhouse_lever": true
+    "auto_submit_greenhouse_lever": false
   }
 }

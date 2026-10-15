@@ -10,40 +10,37 @@
   "location": "",
   "city": "",
   "state": "",
-  "country": "United States",
+  "country": "",
   "current_title": "",
   "current_company": "",
-  "target_titles": [
-    "Senior Product Manager",
-    "Lead Product Manager",
-    "Principal Product Manager"
-  ],
-  "seniority_terms": ["senior", "lead", "principal", "staff", "group"],
-  "target_domains": ["fintech", "payments", "B2B SaaS"],
-  "keywords": [
-    "product manager", "roadmap", "prioritization", "cross-functional",
-    "stakeholder", "experimentation", "discovery", "agile"
-  ],
+  "target_titles": [],
+  "seniority_terms": [],
+  "target_domains": [],
+  "keywords": [],
   "facts": {
     "flagship_metric": "",
     "biggest_launch": "",
     "leadership": ""
   },
   "education": [
-    {"school": "", "degree": "", "years": ""}
+    {
+      "school": "",
+      "degree": "",
+      "years": ""
+    }
   ],
   "screener_answers": {
-    "authorized_to_work_us": "Yes",
-    "require_sponsorship": "No",
-    "remote_ok": "Yes",
-    "hybrid_ok": "Yes",
-    "willing_to_relocate": "No",
-    "how_did_you_hear": "Company careers page",
-    "salary_expectation": "Open to discussion based on total compensation",
-    "gender": "I do not wish to answer",
+    "authorized_to_work_us": "",
+    "require_sponsorship": "",
+    "remote_ok": "",
+    "hybrid_ok": "",
+    "willing_to_relocate": "",
+    "how_did_you_hear": "",
+    "salary_expectation": "",
+    "gender": "",
     "pronouns": "",
-    "race_ethnicity": "Decline to self-identify",
-    "veteran_status": "I am not a protected veteran",
-    "disability_status": "I do not wish to answer"
+    "race_ethnicity": "",
+    "veteran_status": "",
+    "disability_status": ""
   }
 }

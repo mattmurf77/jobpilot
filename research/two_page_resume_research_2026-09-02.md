@@ -9,6 +9,9 @@
 
 **Target companies:** Capital One's one-page rule is student/new-grad guidance; recruiters say longer is fine as you progress. No official page rules found at Microsoft/Amazon/Google/Mercury/Affirm/Brex/Intuit/JPMorgan/Truist.
 
-**Rules for a two-pager:** page one closes the sale (headline, 2-3 line summary, PayPal arc + top metrics); sales years compressed to 2-4 lines on page two; fill at least a third to half of page two or cut to one; name + contact in a page-two header; never split one role across the page break; single column, no tables; never exceed two pages.
+**Rules for a two-pager:** page one closes the sale (headline, 2-3 line summary, career progression + supported outcomes); sales years compressed to 2-4 lines on page two; fill at least a third to half of page two or cut to one; name + contact in a page-two header; never split one role across the page break; single column, no tables; never exceed two pages.
 
 Sources: resumeworded.com, tryexponent.com, jobscan.co, linkedin.com (collaborative article), askconsulting.com, productgym.io, teamblind.com (threads), resumego.net, cnbc.com, huntr.co (Q1 2025, Q1 2026), resumegenius.com, jobseeker.com, novoresume.com, hrdive.com, resumeheatmap.com, capitalonecareers.com, aboutamazon.com, monster.com.
+
+
+Portable-edition note: dated research and sample bullets are writing examples, not candidate facts. Never copy their metrics into a résumé; use the candidate's supported evidence and current employer requirements.
